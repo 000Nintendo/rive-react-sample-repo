@@ -7,7 +7,7 @@ let inputValue = "";
 
 export function MailingListForm() {
   const { rive, RiveComponent } = useRive({
-    src: "mailing_list_signup.riv",
+    src: "mailing_list_signup_update_01.riv",
     artboard: "Mailing List",
     stateMachines: ["MainSM"],
     autoplay: true,
@@ -46,9 +46,9 @@ export function MailingListForm() {
   useEffect(() => {
     if (!rive) return;
 
-    // const inputs = rive.stateMachineInputs("MainSM");
+    const inputs = rive.stateMachineInputs("MainSM");
     // const names = rive.stateMachineNames;
-    // console.log("inputs", inputs);
+    console.log("inputs", inputs);
     // console.log("names", names);
 
     rive.on(EventType.RiveEvent, handleRiveEvent);
