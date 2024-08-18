@@ -5,6 +5,8 @@ export class RiveCanvasEnums {
     btnSubmitClick: "btnSubmitClick",
     btnYes: "btnYes",
     btnNo: "btnNo",
+    btnNoClick: "btnNoClick",
+    btnYesClick: "btnYesClick",
   };
 
   static inputs = {

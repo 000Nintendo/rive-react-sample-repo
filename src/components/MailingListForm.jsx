@@ -26,17 +26,6 @@ export function MailingListForm() {
     showCursor: false,
   });
 
-  // let showInputCursorInput = useStateMachineInput(
-  //   rive,
-  //   "MainSM",
-  //   RiveCanvasEnums.inputs.showTypingCursor
-  // );
-  // let hideInputCursorInput = useStateMachineInput(
-  //   rive,
-  //   "MainSM",
-  //   RiveCanvasEnums.inputs.hideTypingCursor
-  // );
-
   const showInputCursor = () => {
     if (inputValue.length === 0) {
       rive.setTextRunValue("txtMailInput", "");
@@ -83,6 +72,97 @@ export function MailingListForm() {
     animtionStateInput.value = 0;
   };
 
+  const resendVerificationEmail = async () => {
+    let email = rive.getTextRunValue("txtMailInput");
+
+    email = email.toLocaleLowerCase();
+
+    const res = await AuthApiServices.resendVerificationEmail({
+      email,
+    });
+
+    let error = res.error;
+    const errorMessage = res.data?.error;
+
+    if (!error) {
+      toast.current.show({
+        severity: "success",
+        summary: "Email sent!",
+        detail:
+          "Verfification email is sent on your email, please check your inbox!",
+        life: 3000,
+      });
+
+      setCursorState({
+        ...cursorState,
+        showCursor: false,
+      });
+
+      showEmailForm();
+
+      return;
+    }
+
+    toast.current.show({
+      severity: "error",
+      summary: "Failed while sending email!",
+      detail:
+        errorMessage ??
+        "Something went wrong while sending verification email!",
+      life: 3000,
+    });
+  };
+
+  const removeEmail = async () => {
+    let email = rive.getTextRunValue("txtMailInput");
+
+    email = email.toLocaleLowerCase();
+
+    const res = await AuthApiServices.removeAccount({
+      email,
+    });
+
+    let error = res.error;
+    const errorMessage = res.data?.error;
+
+    if (!error) {
+      toast.current.show({
+        severity: "success",
+        summary: "Account is removed!",
+        detail: "Your account is removed successfully!",
+        life: 3000,
+      });
+
+      setCursorState({
+        ...cursorState,
+        showCursor: false,
+      });
+
+      showEmailForm();
+
+      return;
+    }
+
+    toast.current.show({
+      severity: "error",
+      summary: "Something went wrong!",
+      detail:
+        errorMessage ?? "Something went wrong while removing account details!",
+      life: 3000,
+    });
+
+    showEmailForm();
+  };
+
+  const handleRemoveEmail = ({ remove = false }) => {
+    if (remove) {
+      removeEmail();
+      return;
+    }
+
+    showEmailForm();
+  };
+
   const showResendRemoveForm = () => {
     if (!animtionStateInput) return;
 
@@ -94,13 +174,89 @@ export function MailingListForm() {
 
     email = email.toLocaleLowerCase();
 
+    if (!email) {
+      toast.current.show({
+        severity: "error",
+        summary: "Email validation failed!",
+        detail: "Email is required. Please enter valid email address!",
+        life: 3000,
+      });
+    }
+
     const res = await AuthApiServices.verifyEmail({
       email: email,
     });
 
     const isUserExists = res.data?.exists;
     const isError = res.data?.error;
-    const isVerified = res.data?.verified;
+    const isVerified = Boolean(res.data?.verified);
+    const isEmailValid = res.data?.email_validation;
+
+    if (isUserExists && isVerified) {
+      showYesNoView();
+
+      toast.current.show({
+        severity: "success",
+        summary: "Email Already Found",
+        detail:
+          "Email Already Found! Do you wish to remove your email from our mailing list system?",
+        life: 3000,
+      });
+
+      setCursorState({
+        ...cursorState,
+        showCursor: false,
+      });
+      return;
+    }
+
+    if (isUserExists && !isVerified) {
+      showResendRemoveForm();
+
+      toast.current.show({
+        severity: "success",
+        summary: "Email Already Found But Not Verified",
+        detail:
+          "Email Already Found But Not Verified! Do you wish to resend the verification request or remove your email from our system?",
+        life: 3000,
+      });
+
+      setCursorState({
+        ...cursorState,
+        showCursor: false,
+      });
+      return;
+    }
+
+    if (!isUserExists && !isVerified) {
+      showResendRemoveForm();
+
+      toast.current.show({
+        severity: "success",
+        summary: "Registration successfully",
+        detail:
+          "Thank you for your Submission; please check your email to Verify your Registration.",
+        life: 3000,
+      });
+
+      setCursorState({
+        ...cursorState,
+        showCursor: false,
+      });
+      return;
+    }
+
+    if (!isEmailValid) {
+      toast.current.show({
+        severity: "error",
+        summary: "Email validation failed!",
+        detail:
+          isError ?? "Email is not valid. Please enter valid email address!",
+        life: 3000,
+      });
+
+      return;
+    }
 
     if (isError) {
       toast.current.show({
@@ -109,20 +265,88 @@ export function MailingListForm() {
         detail: isError ?? "Something went wrong while working on email!",
         life: 3000,
       });
+
+      return;
+    }
+
+    if (isUserExists) {
+      showYesNoView();
+
+      toast.current.show({
+        severity: "success",
+        summary: "Registratoin successfully",
+        detail:
+          "Email Already Found! Do you wish to remove your email from our mailing list system?",
+        life: 3000,
+      });
+
+      setCursorState({
+        ...cursorState,
+        showCursor: false,
+      });
+    }
+
+    if (!isUserExists) {
+      showYesNoView();
+
+      toast.current.show({
+        severity: "info",
+        summary: "Registratoin successfully",
+        detail: isError ?? "Please verify your email address",
+        life: 3000,
+      });
+
+      setCursorState({
+        ...cursorState,
+        showCursor: false,
+      });
     }
   };
 
   const handleRiveEvent = (event) => {
     let eventname = event?.data?.name;
 
+    console.log("eventname", eventname);
+
+    const animState = animtionStateInput.value;
+
     if (eventname === RiveCanvasEnums.listeners.txtFiedMouseDown) {
       isInputFocused = true;
       showInputCursor();
+      return;
     }
 
     if (eventname === RiveCanvasEnums.listeners.btnSubmitClick) {
       isInputFocused = false;
       submitForm();
+      return;
+    }
+
+    // Event triggers on resend email button as well
+    if (eventname === RiveCanvasEnums.listeners.btnYesClick) {
+      isInputFocused = false;
+
+      handleRemoveEmail({
+        remove: true,
+      });
+
+      return;
+    }
+
+    if (eventname === RiveCanvasEnums.listeners.btnNoClick) {
+      isInputFocused = false;
+
+      if (animState == 2) {
+        resendVerificationEmail({
+          remove: true,
+        });
+
+        return;
+      }
+
+      showEmailForm();
+
+      return;
     }
   };
 
