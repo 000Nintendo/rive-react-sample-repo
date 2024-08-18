@@ -76,7 +76,13 @@ export function MailingListForm() {
   };
 
   const handleKeyChange = (event) => {
-    const key = event.key;
+    let key = event.key;
+
+    let code = event.code;
+
+    if (code?.includes("Key")) {
+      key = code?.[code.length - 1];
+    }
 
     if (key.length == 1) {
       inputValue = inputValue + "" + key;
