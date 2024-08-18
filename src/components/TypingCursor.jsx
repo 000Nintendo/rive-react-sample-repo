@@ -3,8 +3,8 @@ import React, { useEffect } from "react";
 
 const TypingCursor = ({ textWidth = 0, showCursor = false }) => {
   const { rive, RiveComponent } = useRive({
-    src: "typing_cursor.riv",
-    artboard: "Artboard",
+    src: "mailing_list_signup_with_typing_cursor.riv",
+    artboard: "Typing Cursor",
     stateMachines: ["State Machine 1"],
     autoplay: true,
     useDevicePixelRatio: true,
