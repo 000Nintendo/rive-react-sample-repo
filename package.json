@@ -12,6 +12,9 @@
   "dependencies": {
     "@rive-app/canvas-advanced": "^2.19.7",
     "@rive-app/react-canvas": "^4.13.7",
+    "axios": "^1.7.4",
+    "primeflex": "^3.3.1",
+    "primereact": "^10.8.2",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
   },

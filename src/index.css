@@ -50,7 +50,7 @@ button {
 
 #hiddle-text-container {
   position: absolute;
-  /* visibility: hidden; */
+  visibility: hidden;
   height: auto;
   width: auto;
   white-space: nowrap;

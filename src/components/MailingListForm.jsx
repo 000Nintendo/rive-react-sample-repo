@@ -1,12 +1,17 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { EventType, useRive } from "@rive-app/react-canvas";
 import { RiveCanvasEnums } from "../enums/rive-events.enums";
 import TypingCursor from "./TypingCursor";
+import { AuthApiServices } from "../services/apis/auth.api.services";
+import { Toast } from "primereact/toast";
 
 let isInputFocused = false;
 let inputValue = "";
+let animtionStateInput = null;
 
 export function MailingListForm() {
+  const toast = useRef(null);
+
   const { rive, RiveComponent } = useRive({
     src: "mailing_list_signup.riv",
     artboard: "Mailing List",
@@ -66,12 +71,58 @@ export function MailingListForm() {
     });
   };
 
+  const showYesNoView = () => {
+    if (!animtionStateInput) return;
+
+    animtionStateInput.value = 1;
+  };
+
+  const showEmailForm = () => {
+    if (!animtionStateInput) return;
+
+    animtionStateInput.value = 0;
+  };
+
+  const showResendRemoveForm = () => {
+    if (!animtionStateInput) return;
+
+    animtionStateInput.value = 2;
+  };
+
+  const submitForm = async () => {
+    let email = rive.getTextRunValue("txtMailInput");
+
+    email = email.toLocaleLowerCase();
+
+    const res = await AuthApiServices.verifyEmail({
+      email: email,
+    });
+
+    const isUserExists = res.data?.exists;
+    const isError = res.data?.error;
+    const isVerified = res.data?.verified;
+
+    if (isError) {
+      toast.current.show({
+        severity: "error",
+        summary: "Failed!",
+        detail: isError ?? "Something went wrong while working on email!",
+        life: 3000,
+      });
+    }
+  };
+
   const handleRiveEvent = (event) => {
     let eventname = event?.data?.name;
 
-    if (eventname === RiveCanvasEnums.txtFiedMouseDown) {
+    if (eventname === RiveCanvasEnums.listeners.txtFiedMouseDown) {
       isInputFocused = true;
       showInputCursor();
+    }
+
+    if (eventname === RiveCanvasEnums.listeners.btnSubmitClick) {
+      isInputFocused = false;
+      submitForm();
     }
   };
 
@@ -103,17 +154,14 @@ export function MailingListForm() {
     const inputs = rive.stateMachineInputs("MainSM");
     // const names = rive.stateMachineNames;
     console.log("inputs", inputs);
+
     // console.log("names", names);
 
-    // inputs.forEach((input) => {
-    //   if (input.name === RiveCanvasEnums.inputs.showTypingCursor) {
-    //     showInputCursorInput = input;
-    //   }
-
-    //   if (input.name === RiveCanvasEnums.inputs.hideTypingCursor) {
-    //     hideInputCursorInput = input;
-    //   }
-    // });
+    inputs.forEach((input) => {
+      if (input.name === RiveCanvasEnums.inputs.animState) {
+        animtionStateInput = input;
+      }
+    });
 
     // inputValue = rive.getTextRunValue("txtMailInput");
 
@@ -155,6 +203,8 @@ export function MailingListForm() {
         textWidth={cursorState?.textWidth ?? 0}
         showCursor={cursorState.showCursor}
       />
+
+      <Toast ref={toast} />
     </>
   );
 }

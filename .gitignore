@@ -100,7 +100,7 @@ dist-ssr
 
 # DB and environment
 .env*.local
-.env
+# .env
 
 # log garbage
 logs
