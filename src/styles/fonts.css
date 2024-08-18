@@ -1,3 +1,19 @@
+@font-face {
+  font-family: "Berthold Bold";
+  src: url("../fonts/Berthold_Akzidenz_Grotesk/Bold/Berthold-Akzidenz-Grotesk-Bold.eot");
+  src: url("../fonts/Berthold_Akzidenz_Grotesk/Bold/Berthold-Akzidenz-Grotesk-Bold.woff")
+      format("woff"),
+    url("../fonts/Berthold_Akzidenz_Grotesk/Bold/Berthold-Akzidenz-Grotesk-Bold.ttf")
+      format("truetype"),
+    url("../fonts/Berthold_Akzidenz_Grotesk/Bold/Berthold-Akzidenz-Grotesk-Bold.svg")
+      format("svg"),
+    url("../fonts/Berthold_Akzidenz_Grotesk/Bold/Berthold-Akzidenz-Grotesk-Bold.woff2")
+      format("woff2");
+
+  font-weight: normal;
+  font-style: normal;
+}
+
 .poppins-thin {
   font-family: "Poppins", sans-serif;
   font-weight: 100;

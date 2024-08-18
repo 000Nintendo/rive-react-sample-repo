@@ -3,7 +3,6 @@
 @tailwind components;
 @tailwind utilities;
 
-
 .App {
   font-family: sans-serif;
   text-align: center;
@@ -51,12 +50,12 @@ button {
 
 #hiddle-text-container {
   position: absolute;
-  visibility: hidden;
+  /* visibility: hidden; */
   height: auto;
   width: auto;
   white-space: nowrap;
   font-size: 12px;
-  font-family: "Poppins";
+  font-family: "Berthold Bold";
   font-weight: 400;
   letter-spacing: 0;
   width: fit-content !important;

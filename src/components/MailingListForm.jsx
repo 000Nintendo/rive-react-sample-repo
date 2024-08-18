@@ -8,7 +8,7 @@ let inputValue = "";
 
 export function MailingListForm() {
   const { rive, RiveComponent } = useRive({
-    src: "mailing_list_signup_with_typing_cursor.riv",
+    src: "mailing_list_signup.riv",
     artboard: "Mailing List",
     stateMachines: ["MainSM"],
     autoplay: true,
