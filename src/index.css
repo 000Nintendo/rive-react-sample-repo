@@ -2,6 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
+@import url("./styles/fonts.css");
 
 .App {
   font-family: sans-serif;
@@ -17,9 +18,46 @@ button {
 .RiveContainer {
   /* cursor: pointer; */
   position: absolute;
-  height: 100vh;
-  width: 100vw;
-  background: linear-gradient(#4E5B73, #4E5B73);
+  /* height: 100vh;
+  width: 100vw; */
+  background: linear-gradient(#4e5b73, #4e5b73);
   margin: 0;
   padding: 0px;
+}
+
+.form-container {
+  position: relative;
+}
+
+.rive-component-container {
+  width: 420.41px;
+  height: 128px;
+}
+
+.typing-cursor-container {
+  position: absolute;
+  height: 30px;
+  width: 5px;
+  left: 25px;
+  bottom: 29px;
+}
+
+#hidden-email-input {
+  width: 100%;
+  font-family: "poppins-regular", "Courier New", Courier, monospace;
+  font-size: 12px;
+  letter-spacing: 0;
+}
+
+#hiddle-text-container {
+  position: absolute;
+  visibility: hidden;
+  height: auto;
+  width: auto;
+  white-space: nowrap;
+  font-size: 12px;
+  font-family: "Poppins";
+  font-weight: 400;
+  letter-spacing: 0;
+  width: fit-content !important;
 }
