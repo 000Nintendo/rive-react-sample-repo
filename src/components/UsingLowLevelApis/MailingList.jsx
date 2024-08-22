@@ -128,9 +128,7 @@ const MailingList = () => {
   return (
     <div>
       <div ref={container} className="OuterContainer">
-        <div className="InnerContainer">
-          <canvas ref={canvas} />
-        </div>
+        <canvas ref={canvas} />
       </div>
     </div>
   );
