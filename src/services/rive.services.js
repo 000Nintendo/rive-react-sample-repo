@@ -24,35 +24,26 @@ async function loadRiveModule(cb) {
     for (let cb of callbacks) {
       cb(RiveModule);
     }
-
-    // Rive({
-    //   locateFile: (file) => `https://unpkg.com/rive-canvas@0.6.10/${file}`,
-    // }).then((module) => {
-    //   isLoadingModule = false;
-    //   RiveModule = module;
-    //   cb(RiveModule);
-    //   for (let cb of callbacks) {
-    //     cb(RiveModule);
-    //   }
-    // });
   }
 }
 
-export default function loadRive(url) {
-  return new Promise((resolve, reject) => {
-    loadRiveModule((rive) => {
-      const { load } = rive;
-      const assetRequest = new Request(url);
+export class RiveServices {
+  static loadRive = (url) => {
+    return new Promise((resolve, reject) => {
+      loadRiveModule((rive) => {
+        const { load } = rive;
+        const assetRequest = new Request(url);
 
-      fetch(assetRequest)
-        .then((response) => {
-          return response.arrayBuffer();
-        })
-        .then((buffer) => {
-          // Load Rive file from buffer.
-          const file = load(new Uint8Array(buffer));
-          resolve({ rive, file_buffer: buffer, file: file });
-        });
+        fetch(assetRequest)
+          .then((response) => {
+            return response.arrayBuffer();
+          })
+          .then((buffer) => {
+            // Load Rive file from buffer.
+            const file = load(new Uint8Array(buffer));
+            resolve({ rive, file_buffer: buffer, file: file });
+          });
+      });
     });
-  });
+  };
 }

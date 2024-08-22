@@ -1,9 +1,9 @@
 import "./styles/MailingList.scss";
 
 import React, { useEffect, useRef, useState } from "react";
-import loadRive from "../../services/rive.services";
 import InputTypingCursor from "./InputTypingCursor";
 import { RiveEventType } from "@rive-app/react-canvas";
+import { RiveServices } from "../../services/rive.services";
 
 let isInputFocused = false;
 let inputValue = "";
@@ -68,7 +68,9 @@ const MailingList = () => {
         return;
       }
 
-      const { rive, file_buffer } = await loadRive("mailing_list_signup.riv");
+      const { rive, file_buffer } = await RiveServices.loadRive(
+        "mailing_list_signup.riv"
+      );
 
       let file = await rive.load(new Uint8Array(file_buffer));
 

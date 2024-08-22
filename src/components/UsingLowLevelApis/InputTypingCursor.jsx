@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from "react";
-import loadRive from "../../services/rive.services";
+import { RiveServices } from "../../services/rive.services";
 
 const InputTypingCursor = ({ textWidth = 0, showCursor = false }) => {
   const canvas = useRef(null);
@@ -21,7 +21,9 @@ const InputTypingCursor = ({ textWidth = 0, showCursor = false }) => {
         return;
       }
 
-      const { rive, file_buffer } = await loadRive("mailing_list_signup.riv");
+      const { rive, file_buffer } = await RiveServices.loadRive(
+        "mailing_list_signup.riv"
+      );
 
       let file = await rive.load(new Uint8Array(file_buffer));
 
