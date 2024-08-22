@@ -1,12 +1,58 @@
 import "./styles/MailingList.scss";
 
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import loadRive from "../../services/rive.services";
 import InputTypingCursor from "./InputTypingCursor";
+import { RiveEventType } from "@rive-app/react-canvas";
+
+let isInputFocused = false;
+let inputValue = "";
+let animtionStateInput = null;
+let ctx,
+  renderer,
+  alignFit,
+  requestId,
+  artboard,
+  lastTime = 0,
+  stateMachine;
+let instances = {
+  emailInput: null,
+};
 
 const MailingList = () => {
   const canvas = useRef(null);
   const container = useRef(null);
+
+  const [cursorState, setCursorState] = useState({
+    textWidth: 0,
+    text: "",
+    showCursor: false,
+  });
+
+  const showInputCursor = () => {
+    if (inputValue.length === 0) {
+      instances.emailInput.text = "";
+    }
+
+    inputValue = instances.emailInput.text;
+
+    setCursorState({
+      ...cursorState,
+      showCursor: true,
+      text: inputValue,
+    });
+  };
+
+  const setValueToEmailInput = (value) => {
+    if (!isInputFocused) return;
+    instances.emailInput.text = value;
+
+    setCursorState({
+      ...cursorState,
+      showCursor: true,
+      text: value,
+    });
+  };
 
   const resize = () => {
     if (container.current && canvas.current) {
@@ -17,15 +63,6 @@ const MailingList = () => {
   };
 
   useEffect(() => {
-    let instances,
-      ctx,
-      renderer,
-      alignFit,
-      requestId,
-      artboard,
-      lastTime = 0,
-      stateMachine;
-
     const setCanvas = async (canvas) => {
       if (!canvas) {
         return;
@@ -41,7 +78,10 @@ const MailingList = () => {
         artboard.stateMachineByName("MainSM"),
         artboard
       );
+
       let animation = null;
+
+      instances.emailInput = artboard.textRun("txtMailInput");
 
       alignFit = {
         alignment: Alignment.center,
@@ -62,6 +102,8 @@ const MailingList = () => {
         }
         const elapsedTimeMs = time - lastTime;
         const elapsedTimeSec = elapsedTimeMs / 1000;
+        // const elapsedTimeSec = (time - lastTime) / 1000;
+
         lastTime = time;
 
         renderer.clear();
@@ -70,6 +112,31 @@ const MailingList = () => {
             animation.advance(elapsedTimeSec);
             animation.apply(1);
           }
+
+          if (stateMachine) {
+            const numFiredEvents = stateMachine.reportedEventCount();
+            const inputs = stateMachine.inputCount();
+
+            console.log("inputs", inputs);
+
+            for (let i = 0; i < numFiredEvents; i++) {
+              const event = stateMachine.reportedEventAt(i);
+              console.log("event", event);
+
+              debugger;
+              // Run any Event-based logic now
+              let eventType = event.type;
+              // if (event.type === RiveEventType.OpenUrl) {
+              //   const a = document.createElement("a");
+              //   a.setAttribute("href", event.url);
+              //   a.setAttribute("target", event.target);
+              //   a.click();
+              // }
+            }
+          }
+
+          stateMachine.advance(elapsedTimeSec);
+
           artboard.advance(elapsedTimeSec);
           renderer.save();
           renderer.align(
