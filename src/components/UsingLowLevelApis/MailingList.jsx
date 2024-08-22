@@ -1,5 +1,8 @@
+import "./styles/MailingList.scss";
+
 import React, { useEffect, useRef } from "react";
 import loadRive from "../../services/rive.services";
+import InputTypingCursor from "./InputTypingCursor";
 
 const MailingList = () => {
   const canvas = useRef(null);
@@ -45,34 +48,12 @@ const MailingList = () => {
         fit: Fit.cover,
       };
 
-      instances = {
-        // levitate: getInstance("levitate"),
-        // blink: getInstance("blink"),
-        // lookY: getInstance("look_vertical"),
-        // lookX: getInstance("look_horiztonal"),
-        // pupil: getInstance("pupil_shrink"),
-        // rotate: getInstance("rotate_1"),
-      };
+      instances = {};
 
-      let rotateCount = 0;
-      //   instances.blink.time = 1;
       ctx = canvas.getContext("2d", { alpha: true });
       renderer = rive.makeRenderer(canvas);
       artboard.advance(0);
       artboard.draw(renderer);
-
-      //   setInterval(() => {
-      //     const rotateAnimation = artboard.animation(
-      //       `rotate_${rotateCount % 2 === 0 ? 2 : 1}`
-      //     );
-      //     instances = {
-      //       ...instances,
-      //       rotate: new LinearAnimationInstance(rotateAnimation),
-      //     };
-      //     rotateCount++;
-      //   }, 3000);
-
-      //   let lastTime = 0;
       let lastTime = 0;
 
       function renderLoop(time) {
@@ -127,9 +108,10 @@ const MailingList = () => {
 
   return (
     <div>
-      <div ref={container} className="OuterContainer">
-        <canvas ref={canvas} />
+      <div ref={container} className="email-form-container">
+        <canvas ref={canvas} id="email-form-canvas" />
       </div>
+      <InputTypingCursor />
     </div>
   );
 };
