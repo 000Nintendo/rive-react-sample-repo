@@ -15,7 +15,7 @@ async function loadRiveModule(cb) {
 
     const rive = await RiveCanvas({
       locateFile: (_) =>
-        "<https://unpkg.com/@rive-app/canvas-advanced@2.17.3/rive.wasm>",
+        "https://unpkg.com/@rive-app/canvas-advanced@2.17.3/rive.wasm",
     });
 
     isLoadingModule = false;
@@ -51,7 +51,7 @@ export default function loadRive(url) {
         .then((buffer) => {
           // Load Rive file from buffer.
           const file = load(new Uint8Array(buffer));
-          resolve({ rive, file });
+          resolve({ rive, file_buffer: buffer, file: file });
         });
     });
   });

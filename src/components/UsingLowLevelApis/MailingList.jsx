@@ -20,131 +20,104 @@ const MailingList = () => {
       alignFit,
       requestId,
       artboard,
-      lastTime = 0;
+      lastTime = 0,
+      stateMachine;
 
     const setCanvas = async (canvas) => {
       if (!canvas) {
         return;
       }
 
-      const { rive, file } = await loadRive("eye.riv");
+      const { rive, file_buffer } = await loadRive("mailing_list_signup.riv");
+
+      let file = await rive.load(new Uint8Array(file_buffer));
+
       const { CanvasRenderer, LinearAnimationInstance, Alignment, Fit } = rive;
-      const getInstance = (animationName) => {
-        if (artboard) {
-          return new LinearAnimationInstance(artboard.animation(animationName));
-        }
-      };
-      artboard = file.defaultArtboard();
+      artboard = file.artboardByName("Mailing List");
+      stateMachine = new rive.StateMachineInstance(
+        artboard.stateMachineByName("MainSM"),
+        artboard
+      );
+      let animation = null;
+
       alignFit = {
         alignment: Alignment.center,
         fit: Fit.cover,
       };
 
       instances = {
-        levitate: getInstance("levitate"),
-        blink: getInstance("blink"),
-        lookY: getInstance("look_vertical"),
-        lookX: getInstance("look_horiztonal"),
-        pupil: getInstance("pupil_shrink"),
-        rotate: getInstance("rotate_1"),
+        // levitate: getInstance("levitate"),
+        // blink: getInstance("blink"),
+        // lookY: getInstance("look_vertical"),
+        // lookX: getInstance("look_horiztonal"),
+        // pupil: getInstance("pupil_shrink"),
+        // rotate: getInstance("rotate_1"),
       };
 
       let rotateCount = 0;
-      instances.blink.time = 1;
+      //   instances.blink.time = 1;
       ctx = canvas.getContext("2d", { alpha: true });
-      renderer = new CanvasRenderer(ctx);
+      renderer = rive.makeRenderer(canvas);
       artboard.advance(0);
       artboard.draw(renderer);
 
-      setInterval(() => {
-        const rotateAnimation = artboard.animation(
-          `rotate_${rotateCount % 2 === 0 ? 2 : 1}`
-        );
-        instances = {
-          ...instances,
-          rotate: new LinearAnimationInstance(rotateAnimation),
-        };
-        rotateCount++;
-      }, 3000);
+      //   setInterval(() => {
+      //     const rotateAnimation = artboard.animation(
+      //       `rotate_${rotateCount % 2 === 0 ? 2 : 1}`
+      //     );
+      //     instances = {
+      //       ...instances,
+      //       rotate: new LinearAnimationInstance(rotateAnimation),
+      //     };
+      //     rotateCount++;
+      //   }, 3000);
 
-      requestId = requestAnimationFrame(drawFrame);
-    };
+      //   let lastTime = 0;
+      let lastTime = 0;
 
-    const drawFrame = (time) => {
-      if (!ctx || !canvas.current) {
-        return;
-      }
-
-      if (!lastTime) {
+      function renderLoop(time) {
+        if (!lastTime) {
+          lastTime = time;
+        }
+        const elapsedTimeMs = time - lastTime;
+        const elapsedTimeSec = elapsedTimeMs / 1000;
         lastTime = time;
+
+        renderer.clear();
+        if (artboard) {
+          if (animation) {
+            animation.advance(elapsedTimeSec);
+            animation.apply(1);
+          }
+          artboard.advance(elapsedTimeSec);
+          renderer.save();
+          renderer.align(
+            rive.Fit.contain,
+            rive.Alignment.center,
+            {
+              minX: 0,
+              minY: 0,
+              maxX: canvas.width,
+              maxY: canvas.height,
+            },
+            artboard.bounds
+          );
+          artboard.draw(renderer);
+          renderer.restore();
+        }
+        rive.requestAnimationFrame(renderLoop);
       }
-      const elapsedSeconds = (time - lastTime) / 1000;
-      lastTime = time;
+      rive.requestAnimationFrame(renderLoop);
 
-      instances.levitate.advance(elapsedSeconds);
-      instances.levitate.apply(artboard, 1.0);
-
-      instances.blink.advance(elapsedSeconds);
-      instances.blink.apply(artboard, 1.0);
-
-      instances.rotate.advance(elapsedSeconds);
-      instances.rotate.apply(artboard, 1.0);
-
-      artboard.advance(elapsedSeconds);
-
-      ctx.clearRect(0, 0, canvas.current.width, canvas.current.height);
-      ctx.save();
-      align();
-      artboard.draw(renderer);
-      ctx?.restore();
-
-      requestId = requestAnimationFrame(drawFrame);
-    };
-
-    const focus = (e) => {
-      if (!instances) {
-        return;
-      }
-
-      instances.lookY.time = e.clientY / window.innerHeight;
-      instances.lookX.time = e.clientX / window.innerWidth;
-      instances.lookY.apply(artboard, 1.0);
-      instances.lookX.apply(artboard, 1.0);
-
-      const d = Math.hypot(
-        e.clientX - window.innerWidth / 2,
-        e.clientY - window.innerHeight / 2
-      );
-
-      const c = Math.hypot(window.innerWidth / 2, window.innerHeight / 2);
-
-      instances.pupil.time = d / c;
-      instances.pupil.apply(artboard, 1.0);
-    };
-
-    const align = () => {
-      renderer.align(
-        alignFit.fit,
-        alignFit.alignment,
-        {
-          minX: 0,
-          minY: 0,
-          maxX: canvas.current?.width ?? 0,
-          maxY: canvas.current?.height ?? 0,
-        },
-        artboard.bounds
-      );
-    };
-
-    const blink = () => {
-      instances.blink.time = 0;
+      //   requestId = requestAnimationFrame(drawFrame);
     };
 
     setCanvas(canvas.current);
     resize();
     window.addEventListener("resize", resize);
     window.addEventListener("mousemove", (e) => focus(e));
-    canvas.current?.addEventListener("mousedown", blink);
+    // canvas.current?.addEventListener("mousedown", blink);
+
     return () => {
       cancelAnimationFrame(requestId);
       window.removeEventListener("resize", resize);
@@ -159,7 +132,6 @@ const MailingList = () => {
           <canvas ref={canvas} />
         </div>
       </div>
-      <p>Click the eye</p>
     </div>
   );
 };
