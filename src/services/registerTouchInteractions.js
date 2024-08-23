@@ -46,6 +46,7 @@ export const registerTouchInteractions = ({
   alignment,
   isTouchScrollEnabled = false,
 }) => {
+
   if (
     !canvas ||
     !stateMachines.length ||
@@ -56,6 +57,7 @@ export const registerTouchInteractions = ({
   ) {
     return null;
   }
+
   /**
    * After a touchend event, some browsers may fire synthetic mouse events
    * (mouseover, mousedown, mousemove, mouseup) if the touch interaction did not cause
@@ -147,7 +149,7 @@ export const registerTouchInteractions = ({
        */
       case "mouseout":
         for (const stateMachine of stateMachines) {
-          stateMachine.pointerMove(
+          stateMachine?.N?.pointerMove(
             transformedX < 0 ? transformedX - 10000 : transformedX + 10000,
             transformedY < 0 ? transformedY - 10000 : transformedY + 10000
           );
@@ -159,7 +161,7 @@ export const registerTouchInteractions = ({
       case "mouseover":
       case "mousemove": {
         for (const stateMachine of stateMachines) {
-          stateMachine.pointerMove(transformedX, transformedY);
+          stateMachine?.N?.pointerMove(transformedX, transformedY);
         }
         break;
       }
@@ -167,7 +169,7 @@ export const registerTouchInteractions = ({
       case "touchstart":
       case "mousedown": {
         for (const stateMachine of stateMachines) {
-          stateMachine.pointerDown(transformedX, transformedY);
+          stateMachine?.N?.pointerDown(transformedX, transformedY);
         }
         break;
       }
@@ -175,7 +177,7 @@ export const registerTouchInteractions = ({
       case "touchend":
       case "mouseup": {
         for (const stateMachine of stateMachines) {
-          stateMachine.pointerUp(transformedX, transformedY);
+          stateMachine?.N?.pointerUp(transformedX, transformedY);
         }
         break;
       }

@@ -2,7 +2,7 @@ import "./styles/MailingList.scss";
 
 import React, { useEffect, useRef, useState } from "react";
 import InputTypingCursor from "./InputTypingCursor";
-import { RiveEventType } from "@rive-app/react-canvas";
+import { Layout, RiveEventType } from "@rive-app/react-canvas";
 import { RiveServices } from "../../services/rive.services";
 
 let isInputFocused = false;
@@ -94,14 +94,23 @@ const MailingList = () => {
 
       instances = {};
 
-      debugger
-
-      RiveServices.setupRiveListeners({}, rive, [stateMachine]);
+      let layout = new Layout();
 
       ctx = canvas.getContext("2d", { alpha: true });
       renderer = rive.makeRenderer(canvas);
       artboard.advance(0);
       artboard.draw(renderer);
+
+      RiveServices.setupRiveListeners({
+        riveListenerOptions: {},
+        artboard: artboard,
+        canvas,
+        layout,
+        renderer,
+        rive,
+        stateMachines: [stateMachine],
+      });
+
       let lastTime = 0;
 
       function renderLoop(time) {
@@ -129,21 +138,14 @@ const MailingList = () => {
 
             const stateChangeCount = stateMachine.stateChangedCount();
 
-            console.log("numFiredEvents", numFiredEvents);
+            // console.log("numFiredEvents", numFiredEvents);
 
             for (let i = 0; i < numFiredEvents; i++) {
               const event = stateMachine.reportedEventAt(i);
               console.log("rive event", event);
-
-              debugger;
               // Run any Event-based logic now
               let eventType = event.type;
-              // if (event.type === RiveEventType.OpenUrl) {
-              //   const a = document.createElement("a");
-              //   a.setAttribute("href", event.url);
-              //   a.setAttribute("target", event.target);
-              //   a.click();
-              // }
+
             }
           }
 

@@ -56,12 +56,21 @@ export class RiveServices {
    * touch scrolling on the canvas element on touch-enabled devices
    * i.e. { isTouchScrollEnabled: true }
    */
-  static setupRiveListeners(riveListenerOptions, rive, stateMachines = [], canvas, artboard, renderer ) {
+  static setupRiveListeners({
+    riveListenerOptions,
+    rive,
+    stateMachines = [],
+    canvas,
+    artboard,
+    renderer,
+    layout,
+  }) {
     if (!this.shouldDisableRiveListeners) {
       const activeStateMachines = (stateMachines || [])
-        .filter((sm) => sm.playing && rive.hasListeners(sm.instance))
-        .map((sm) => sm.instance);
+        // .filter((sm) => sm.playing && rive.hasListeners(sm.instance))
+        .map((sm) => sm?.g?.u?.i);
       let touchScrollEnabledOption = this.isTouchScrollEnabled;
+
       if (
         riveListenerOptions &&
         "isTouchScrollEnabled" in riveListenerOptions
@@ -69,13 +78,13 @@ export class RiveServices {
         touchScrollEnabledOption = riveListenerOptions.isTouchScrollEnabled;
       }
       this.eventCleanup = registerTouchInteractions({
-        canvas: this.canvas,
-        artboard: this.artboard,
+        canvas: canvas,
+        artboard: artboard,
         stateMachines: activeStateMachines,
-        renderer: this.renderer,
+        renderer: renderer,
         rive: rive,
-        fit: this._layout.runtimeFit(rive),
-        alignment: this._layout.runtimeAlignment(rive),
+        fit: rive.Fit,
+        alignment: rive.Alignment,
         isTouchScrollEnabled: touchScrollEnabledOption,
       });
     }
