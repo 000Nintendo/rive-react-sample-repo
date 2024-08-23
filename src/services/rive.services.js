@@ -1,4 +1,5 @@
 import RiveCanvas from "@rive-app/canvas-advanced";
+import { registerTouchInteractions } from "./registerTouchInteractions";
 
 let RiveModule = null;
 let isLoadingModule = false;
@@ -28,6 +29,8 @@ async function loadRiveModule(cb) {
 }
 
 export class RiveServices {
+  static eventCleanup = null;
+
   static loadRive = (url) => {
     return new Promise((resolve, reject) => {
       loadRiveModule((rive) => {
@@ -46,4 +49,44 @@ export class RiveServices {
       });
     });
   };
+
+  /**
+   * Setup Rive Listeners on the canvas
+   * @param riveListenerOptions - Enables TouchEvent events on the canvas. Set to true to allow
+   * touch scrolling on the canvas element on touch-enabled devices
+   * i.e. { isTouchScrollEnabled: true }
+   */
+  static setupRiveListeners(riveListenerOptions, rive, stateMachines = [], canvas, artboard, renderer ) {
+    if (!this.shouldDisableRiveListeners) {
+      const activeStateMachines = (stateMachines || [])
+        .filter((sm) => sm.playing && rive.hasListeners(sm.instance))
+        .map((sm) => sm.instance);
+      let touchScrollEnabledOption = this.isTouchScrollEnabled;
+      if (
+        riveListenerOptions &&
+        "isTouchScrollEnabled" in riveListenerOptions
+      ) {
+        touchScrollEnabledOption = riveListenerOptions.isTouchScrollEnabled;
+      }
+      this.eventCleanup = registerTouchInteractions({
+        canvas: this.canvas,
+        artboard: this.artboard,
+        stateMachines: activeStateMachines,
+        renderer: this.renderer,
+        rive: rive,
+        fit: this._layout.runtimeFit(rive),
+        alignment: this._layout.runtimeAlignment(rive),
+        isTouchScrollEnabled: touchScrollEnabledOption,
+      });
+    }
+  }
+
+  /**
+   * Remove Rive Listeners setup on the canvas
+   */
+  static removeRiveListeners() {
+    if (this.eventCleanup) {
+      this.eventCleanup();
+    }
+  }
 }

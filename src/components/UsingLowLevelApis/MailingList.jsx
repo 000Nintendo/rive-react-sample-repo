@@ -80,8 +80,10 @@ const MailingList = () => {
         artboard.stateMachineByName("MainSM"),
         artboard
       );
-
-      let animation = null;
+      const animation = new rive.LinearAnimationInstance(
+        artboard.animationByName("MainSM"),
+        artboard
+      );
 
       instances.emailInput = artboard.textRun("txtMailInput");
 
@@ -91,6 +93,10 @@ const MailingList = () => {
       };
 
       instances = {};
+
+      debugger
+
+      RiveServices.setupRiveListeners({}, rive, [stateMachine]);
 
       ctx = canvas.getContext("2d", { alpha: true });
       renderer = rive.makeRenderer(canvas);
@@ -108,6 +114,8 @@ const MailingList = () => {
 
         lastTime = time;
 
+        const numFiredEvents = stateMachine.reportedEventCount();
+
         renderer.clear();
         if (artboard) {
           if (animation) {
@@ -119,11 +127,13 @@ const MailingList = () => {
             const numFiredEvents = stateMachine.reportedEventCount();
             const inputs = stateMachine.inputCount();
 
-            console.log("inputs", inputs);
+            const stateChangeCount = stateMachine.stateChangedCount();
+
+            console.log("numFiredEvents", numFiredEvents);
 
             for (let i = 0; i < numFiredEvents; i++) {
               const event = stateMachine.reportedEventAt(i);
-              console.log("event", event);
+              console.log("rive event", event);
 
               debugger;
               // Run any Event-based logic now
@@ -137,8 +147,12 @@ const MailingList = () => {
             }
           }
 
-          stateMachine.advance(elapsedTimeSec);
+          if (animation) {
+            animation.advance(elapsedTimeSec);
+            animation.apply(1);
+          }
 
+          stateMachine.advance(elapsedTimeSec);
           artboard.advance(elapsedTimeSec);
           renderer.save();
           renderer.align(
