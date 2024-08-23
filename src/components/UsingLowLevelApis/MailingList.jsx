@@ -6,17 +6,11 @@ import { Layout, RiveEventType } from "@rive-app/react-canvas";
 import { RiveServices } from "../../services/rive.services";
 import { RiveCanvasEnums } from "../../enums/rive-events.enums";
 import { Toast } from "primereact/toast";
+import { AuthApiServices } from "../../services/apis/auth.api.services";
 
 let isInputFocused = false;
 let inputValue = "";
-let animtionStateInput = null;
-let ctx,
-  renderer,
-  alignFit,
-  requestId,
-  artboard,
-  lastTime = 0,
-  stateMachine;
+let ctx, renderer, requestId, artboard, stateMachine;
 let instances = {
   emailInput: null,
   animState: 0,
@@ -66,6 +60,243 @@ const MailingList = () => {
     }
   };
 
+  const showYesNoView = () => {
+    instances.animState.asNumber().value = 1;
+  };
+
+  const showEmailForm = () => {
+    instances.animState.asNumber().value = 0;
+  };
+
+  const showResendRemoveForm = () => {
+    instances.animState.asNumber().value = 2;
+  };
+
+  const submitForm = async () => {
+    let email = instances.emailInput.text;
+
+    email = email.toLocaleLowerCase();
+
+    if (!email) {
+      toast.current.show({
+        severity: "error",
+        summary: "Email validation failed!",
+        detail: "Email is required. Please enter valid email address!",
+        life: 3000,
+      });
+    }
+
+    const res = await AuthApiServices.verifyEmail({
+      email: email,
+    });
+
+    const isUserExists = res.data?.exists;
+    const isError = res.data?.error;
+    const isVerified = Boolean(res.data?.verified);
+    const isEmailValid = res.data?.email_validation;
+
+    if (isUserExists && isVerified) {
+      showYesNoView();
+
+      toast.current.show({
+        severity: "success",
+        summary: "Email Already Found",
+        detail:
+          "Email Already Found! Do you wish to remove your email from our mailing list system?",
+        life: 3000,
+      });
+
+      setCursorState({
+        ...cursorState,
+        showCursor: false,
+      });
+      return;
+    }
+
+    if (isUserExists && !isVerified) {
+      showResendRemoveForm();
+
+      toast.current.show({
+        severity: "success",
+        summary: "Email Already Found But Not Verified",
+        detail:
+          "Email Already Found But Not Verified! Do you wish to resend the verification request or remove your email from our system?",
+        life: 3000,
+      });
+
+      setCursorState({
+        ...cursorState,
+        showCursor: false,
+      });
+      return;
+    }
+
+    if (!isUserExists && !isVerified) {
+      showResendRemoveForm();
+
+      toast.current.show({
+        severity: "success",
+        summary: "Registration successfully",
+        detail:
+          "Thank you for your Submission; please check your email to Verify your Registration.",
+        life: 3000,
+      });
+
+      setCursorState({
+        ...cursorState,
+        showCursor: false,
+      });
+      return;
+    }
+
+    if (!isEmailValid) {
+      toast.current.show({
+        severity: "error",
+        summary: "Email validation failed!",
+        detail:
+          isError ?? "Email is not valid. Please enter valid email address!",
+        life: 3000,
+      });
+
+      return;
+    }
+
+    if (isError) {
+      toast.current.show({
+        severity: "error",
+        summary: "Failed!",
+        detail: isError ?? "Something went wrong while working on email!",
+        life: 3000,
+      });
+
+      return;
+    }
+
+    if (isUserExists) {
+      showYesNoView();
+
+      toast.current.show({
+        severity: "success",
+        summary: "Registratoin successfully",
+        detail:
+          "Email Already Found! Do you wish to remove your email from our mailing list system?",
+        life: 3000,
+      });
+
+      setCursorState({
+        ...cursorState,
+        showCursor: false,
+      });
+    }
+
+    if (!isUserExists) {
+      showYesNoView();
+
+      toast.current.show({
+        severity: "info",
+        summary: "Registration successfully",
+        detail: isError ?? "Please verify your email address",
+        life: 3000,
+      });
+
+      setCursorState({
+        ...cursorState,
+        showCursor: false,
+      });
+    }
+  };
+
+  const removeEmail = async () => {
+    let email = instances.emailInput.text;
+
+    email = email.toLocaleLowerCase();
+
+    const res = await AuthApiServices.removeAccount({
+      email,
+    });
+
+    let error = res.error;
+    const errorMessage = res.data?.error;
+
+    if (!error) {
+      toast.current.show({
+        severity: "success",
+        summary: "Account is removed!",
+        detail: "Your account is removed successfully!",
+        life: 3000,
+      });
+
+      setCursorState({
+        ...cursorState,
+        showCursor: false,
+      });
+
+      showEmailForm();
+
+      return;
+    }
+
+    toast.current.show({
+      severity: "error",
+      summary: "Something went wrong!",
+      detail:
+        errorMessage ?? "Something went wrong while removing account details!",
+      life: 3000,
+    });
+
+    showEmailForm();
+  };
+
+  const resendVerificationEmail = async () => {
+    let email = instances.emailInput.text;
+
+    email = email.toLocaleLowerCase();
+
+    const res = await AuthApiServices.resendVerificationEmail({
+      email,
+    });
+
+    let error = res.error;
+    const errorMessage = res.data?.error;
+
+    if (!error) {
+      toast.current.show({
+        severity: "success",
+        summary: "Email sent!",
+        detail:
+          "Verfification email is sent on your email, please check your inbox!",
+        life: 3000,
+      });
+
+      setCursorState({
+        ...cursorState,
+        showCursor: false,
+      });
+
+      showEmailForm();
+
+      return;
+    }
+
+    toast.current.show({
+      severity: "error",
+      summary: "Failed while sending email!",
+      detail:
+        errorMessage ??
+        "Something went wrong while sending verification email!",
+      life: 3000,
+    });
+  };
+
+  const handleRemoveEmail = ({ remove = false }) => {
+    if (remove) {
+      removeEmail();
+      return;
+    }
+
+    showEmailForm();
+  };
+
   const handleRiveEvent = (event) => {
     let eventname = event?.name;
 
@@ -81,7 +312,7 @@ const MailingList = () => {
 
     if (eventname === RiveCanvasEnums.listeners.btnSubmitClick) {
       isInputFocused = false;
-      // submitForm();
+      submitForm();
       return;
     }
 
@@ -89,9 +320,9 @@ const MailingList = () => {
     if (eventname === RiveCanvasEnums.listeners.btnYesClick) {
       isInputFocused = false;
 
-      // handleRemoveEmail({
-      //   remove: true,
-      // });
+      handleRemoveEmail({
+        remove: true,
+      });
 
       return;
     }
@@ -100,14 +331,14 @@ const MailingList = () => {
       isInputFocused = false;
 
       if (animState == 2) {
-        // resendVerificationEmail({
-        //   remove: true,
-        // });
+        resendVerificationEmail({
+          remove: true,
+        });
 
         return;
       }
 
-      // showEmailForm();
+      showEmailForm();
 
       return;
     }
@@ -147,7 +378,6 @@ const MailingList = () => {
 
       let file = await rive.load(new Uint8Array(file_buffer));
 
-      const { Alignment, Fit } = rive;
       artboard = file.artboardByName("Mailing List");
       stateMachine = new rive.StateMachineInstance(
         artboard.stateMachineByName("MainSM"),
@@ -169,10 +399,9 @@ const MailingList = () => {
         }
       }
 
-      alignFit = {
-        alignment: Alignment.center,
-        fit: Fit.cover,
-      };
+      if (instances?.animState?.asNumber) {
+        instances.animState.asNumber().value = 0;
+      }
 
       let layout = new Layout();
 
@@ -180,8 +409,6 @@ const MailingList = () => {
       renderer = rive.makeRenderer(canvas);
       artboard.advance(0);
       artboard.draw(renderer);
-
-      let lastTime = 0;
 
       RiveServices.setupRiveListeners({
         riveListenerOptions: {},
@@ -193,17 +420,18 @@ const MailingList = () => {
         stateMachines: [stateMachine],
       });
 
+      let lastTime = 0;
+
       function renderLoop(time) {
         if (!lastTime) {
           lastTime = time;
         }
         const elapsedTimeMs = time - lastTime;
         const elapsedTimeSec = elapsedTimeMs / 1000;
-        // const elapsedTimeSec = (time - lastTime) / 1000;
-
         lastTime = time;
 
         renderer.clear();
+
         if (artboard) {
           if (animation) {
             animation.advance(elapsedTimeSec);
@@ -212,18 +440,10 @@ const MailingList = () => {
 
           if (stateMachine) {
             const numFiredEvents = stateMachine.reportedEventCount();
-
-            console.log("numFiredEvents", numFiredEvents);
-
             for (let i = 0; i < numFiredEvents; i++) {
               const event = stateMachine.reportedEventAt(i);
               handleRiveEvent(event);
             }
-          }
-
-          if (animation) {
-            animation.advance(elapsedTimeSec);
-            animation.apply(1);
           }
 
           stateMachine.advance(elapsedTimeSec);
@@ -243,18 +463,15 @@ const MailingList = () => {
           artboard.draw(renderer);
           renderer.restore();
         }
-        rive.requestAnimationFrame(renderLoop);
+        requestId = rive.requestAnimationFrame(renderLoop);
       }
-      rive.requestAnimationFrame(renderLoop);
-
-      //   requestId = requestAnimationFrame(drawFrame);
+      requestId = rive.requestAnimationFrame(renderLoop);
     };
 
     setCanvas(canvas.current);
     resize();
     window.addEventListener("resize", resize);
     window.addEventListener("mousemove", (e) => focus(e));
-    // canvas.current?.addEventListener("mousedown", blink);
     window.addEventListener("keydown", handleKeyChange);
 
     return () => {

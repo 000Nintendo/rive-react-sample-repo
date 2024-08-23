@@ -14,7 +14,7 @@ const InputTypingCursor = ({ textWidth = 0, showCursor = false }) => {
   };
 
   useEffect(() => {
-    let instances, ctx, renderer, alignFit, requestId, artboard, stateMachine;
+    let ctx, renderer, requestId, artboard, stateMachine;
 
     const setCanvas = async (canvas) => {
       if (!canvas) {
@@ -27,27 +27,12 @@ const InputTypingCursor = ({ textWidth = 0, showCursor = false }) => {
 
       let file = await rive.load(new Uint8Array(file_buffer));
 
-      const { CanvasRenderer, LinearAnimationInstance, Alignment, Fit } = rive;
       artboard = file.artboardByName("Typing Cursor");
       stateMachine = new rive.StateMachineInstance(
         artboard.stateMachineByName("State Machine 1"),
         artboard
       );
       let animation = null;
-
-      alignFit = {
-        alignment: Alignment.center,
-        fit: Fit.cover,
-      };
-
-      instances = {
-        // levitate: getInstance("levitate"),
-        // blink: getInstance("blink"),
-        // lookY: getInstance("look_vertical"),
-        // lookX: getInstance("look_horiztonal"),
-        // pupil: getInstance("pupil_shrink"),
-        // rotate: getInstance("rotate_1"),
-      };
 
       ctx = canvas.getContext("2d", { alpha: true });
       renderer = rive.makeRenderer(canvas);
@@ -86,18 +71,15 @@ const InputTypingCursor = ({ textWidth = 0, showCursor = false }) => {
           artboard.draw(renderer);
           renderer.restore();
         }
-        rive.requestAnimationFrame(renderLoop);
+        requestId = rive.requestAnimationFrame(renderLoop);
       }
-      rive.requestAnimationFrame(renderLoop);
-
-      //   requestId = requestAnimationFrame(drawFrame);
+      requestId = rive.requestAnimationFrame(renderLoop);
     };
 
     setCanvas(canvas.current);
     resize();
     window.addEventListener("resize", resize);
     window.addEventListener("mousemove", (e) => focus(e));
-    // canvas.current?.addEventListener("mousedown", blink);
 
     return () => {
       cancelAnimationFrame(requestId);
@@ -107,6 +89,7 @@ const InputTypingCursor = ({ textWidth = 0, showCursor = false }) => {
   }, []);
 
   useEffect(() => {
+    if (!showCursor) return;
     const typingCursorContainer = document.querySelector(
       ".input-typing-cursor-container"
     );
@@ -118,7 +101,12 @@ const InputTypingCursor = ({ textWidth = 0, showCursor = false }) => {
 
   return (
     <>
-      <div ref={container} className="input-typing-cursor-container">
+      <div
+        ref={container}
+        className={`input-typing-cursor-container ${
+          showCursor ? "" : "hide-input-cursor"
+        }`}
+      >
         <canvas ref={canvas} id="input-typing-cursor-canvas" />
       </div>
     </>

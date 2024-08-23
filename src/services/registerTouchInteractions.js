@@ -167,6 +167,7 @@ export const registerTouchInteractions = ({
       }
       // Pointer click initiated but not released yet on the canvas
       case "touchstart":
+      case "click":
       case "mousedown": {
         for (const stateMachine of stateMachines) {
           stateMachine?.pointerDown(transformedX, transformedY);
