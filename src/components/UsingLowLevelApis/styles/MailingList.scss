@@ -12,3 +12,17 @@
     left: 25px;
     bottom: 29px;
 }
+
+
+#hidden-text-container {
+    position: absolute;
+    // visibility: hidden;
+    height: auto;
+    width: auto;
+    white-space: nowrap;
+    font-size: 12px;
+    font-family: "Berthold Bold";
+    font-weight: 400;
+    letter-spacing: 0;
+    width: fit-content !important;
+}

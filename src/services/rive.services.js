@@ -68,7 +68,8 @@ export class RiveServices {
     if (!this.shouldDisableRiveListeners) {
       const activeStateMachines = (stateMachines || [])
         // .filter((sm) => sm.playing && rive.hasListeners(sm.instance))
-        .map((sm) => sm?.g?.u?.i);
+        // .map((sm) => sm?.g?.u?.i);
+        .map((sm) => sm);
       let touchScrollEnabledOption = this.isTouchScrollEnabled;
 
       if (

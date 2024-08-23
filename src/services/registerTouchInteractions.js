@@ -149,7 +149,7 @@ export const registerTouchInteractions = ({
        */
       case "mouseout":
         for (const stateMachine of stateMachines) {
-          stateMachine?.N?.pointerMove(
+          stateMachine?.pointerMove(
             transformedX < 0 ? transformedX - 10000 : transformedX + 10000,
             transformedY < 0 ? transformedY - 10000 : transformedY + 10000
           );
@@ -161,7 +161,7 @@ export const registerTouchInteractions = ({
       case "mouseover":
       case "mousemove": {
         for (const stateMachine of stateMachines) {
-          stateMachine?.N?.pointerMove(transformedX, transformedY);
+          stateMachine?.pointerMove(transformedX, transformedY);
         }
         break;
       }
@@ -169,7 +169,7 @@ export const registerTouchInteractions = ({
       case "touchstart":
       case "mousedown": {
         for (const stateMachine of stateMachines) {
-          stateMachine?.N?.pointerDown(transformedX, transformedY);
+          stateMachine?.pointerDown(transformedX, transformedY);
         }
         break;
       }
@@ -177,7 +177,7 @@ export const registerTouchInteractions = ({
       case "touchend":
       case "mouseup": {
         for (const stateMachine of stateMachines) {
-          stateMachine?.N?.pointerUp(transformedX, transformedY);
+          stateMachine?.pointerUp(transformedX, transformedY);
         }
         break;
       }
