@@ -2,7 +2,7 @@ import "./styles/MailingList.scss";
 
 import React, { useEffect, useRef, useState } from "react";
 import InputTypingCursor from "./InputTypingCursor";
-import { Layout, RiveEventType } from "@rive-app/react-canvas";
+import { Layout } from "@rive-app/react-canvas";
 import { RiveServices } from "../../services/rive.services";
 import { RiveCanvasEnums } from "../../enums/rive-events.enums";
 import { Toast } from "primereact/toast";
@@ -302,7 +302,9 @@ const MailingList = () => {
 
     console.log("eventname", eventname);
 
-    const animState = instances.animState?.g?.count?.value;
+    const animState = instances.animState.asNumber().value;
+
+    console.log("animState", animState);
 
     if (eventname === RiveCanvasEnums.listeners.txtFiedMouseDown) {
       isInputFocused = true;
